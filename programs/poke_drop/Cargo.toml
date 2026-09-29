@@ -1,0 +1,38 @@
+[package]
+name = "poke_drop"
+version = "0.1.0"
+description = "Pokepacks transparent gacha drops"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib", "lib"]
+name = "poke_drop"
+
+[features]
+default = []
+cpi = ["no-entrypoint"]
+no-entrypoint = []
+no-idl = []
+no-log-ix-name = []
+idl-build = ["anchor-lang/idl-build", "anchor-spl/idl-build", "switchboard-on-demand/idl-build"]
+anchor-debug = []
+custom-heap = []
+custom-panic = []
+# Local tests only. Never combine with a devnet/mainnet deploy.
+# `anchor test -- --features mock-randomness`
+mock-randomness = []
+
+[dependencies]
+anchor-lang = { version = "=0.32.1", features = ["init-if-needed"] }
+anchor-spl = "=0.32.1"
+switchboard-on-demand = { version = "=0.10.0", features = ["anchor"] }
+# Pinned: solana-zero-copy 1.1.0 broke type inference inside spl-token-2022-interface
+# (E0283 on PodU64 PartialOrd/PartialEq/From). 1.0.1 is the last version the
+# Switchboard SDK builds against cleanly.
+solana-zero-copy = "=1.0.1"
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = [
+    'cfg(target_os, values("solana"))',
+    'cfg(poke_deploy)',
+] }

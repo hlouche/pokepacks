@@ -1,0 +1,27 @@
+{
+  "name": "pokepacks",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "bash scripts/anchor-test.sh",
+    "setup:devnet": "tsx scripts/setup-devnet.ts",
+    "e2e:devnet": "tsx scripts/devnet-e2e.ts"
+  },
+  "dependencies": {
+    "@anchor-lang/core": "1.0.2",
+    "@solana/spl-token": "0.4.13",
+    "@solana/web3.js": "1.98.4",
+    "@switchboard-xyz/on-demand": "3.10.1",
+    "bn.js": "^5.2.1"
+  },
+  "devDependencies": {
+    "@types/bn.js": "^5.1.6",
+    "@types/chai": "^5.2.2",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^22.10.0",
+    "chai": "^5.2.0",
+    "mocha": "^11.1.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.7.3"
+  }
+}

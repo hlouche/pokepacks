@@ -1,0 +1,13 @@
+.anchor
+target
+node_modules
+test-ledger
+.DS_Store
+app/node_modules
+app/.next
+app/.env*.local
+.vercel
+*.log
+devnet-state.json
+keys/*.json
+.idea

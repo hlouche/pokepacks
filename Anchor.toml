@@ -1,0 +1,27 @@
+[toolchain]
+anchor_version = "0.32.1"
+solana_version = "2.3.0"
+package_manager = "npm"
+
+[features]
+resolution = true
+skip-lint = false
+
+[programs.localnet]
+poke_drop = "3hQgfmcBJbdvz2Gdab57SHuGAoCT9ST1QNyvFvyxqMHx"
+
+[programs.devnet]
+poke_drop = "3hQgfmcBJbdvz2Gdab57SHuGAoCT9ST1QNyvFvyxqMHx"
+
+[registry]
+url = "https://api.apr.dev"
+
+[provider]
+cluster = "localnet"
+wallet = "~/.config/solana/id.json"
+
+[scripts]
+test = "node --import tsx node_modules/mocha/bin/mocha.js --timeout 1000000 tests/poke_drop.ts"
+
+[test]
+startup_wait = 10000

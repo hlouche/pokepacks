@@ -1,0 +1,8 @@
+#!/bin/bash
+# Solana CLI 2.3.0 ships platform-tools v1.48 (Rust 1.84). Current crates.io
+# manifests use edition 2024, which that cargo cannot parse. v1.52 is Rust 1.89
+# and still emits SBF v0 binaries. Anchor calls this binary if it is first on PATH.
+if [[ "${1:-}" == "build-sbf" ]]; then
+  shift
+fi
+exec "$HOME/.local/share/solana/install/active_release/bin/cargo-build-sbf" --tools-version v1.52 "$@"
