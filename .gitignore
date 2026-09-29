@@ -11,3 +11,4 @@ app/.env*.local
 devnet-state.json
 keys/*.json
 .idea
+.env*
