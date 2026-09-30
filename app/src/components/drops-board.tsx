@@ -60,56 +60,69 @@ export function DropsBoard() {
   }, [load]);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-end justify-between gap-4">
-        <div>
-          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-primary">Devnet counter</p>
-          <h1 className="mt-1 text-3xl font-semibold tracking-tight">Live drops</h1>
-          <p className="mt-2 max-w-xl text-sm text-zinc-400">
-            One card, drawn uniformly from whatever is still in the case. The inventory is the odds.
-          </p>
+    <div>
+      <section className="pp-hero">
+        <div className="pp-hero-glow" />
+        <div className="pp-hero-title">
+          <h1>
+            Open the
+            <br />
+            case.
+            <br />
+            <em>See the odds.</em>
+          </h1>
         </div>
-        <button className="font-mono text-[11px] uppercase tracking-widest text-primary" onClick={() => load()} type="button">
+        <div className="pp-hero-card">
+          <p>One card per pack, drawn uniformly from whatever is still in the case. The inventory is the odds.</p>
+          <Link className="pp-link" href="/operator">
+            Open a drop
+          </Link>
+        </div>
+      </section>
+
+      <div className="pp-band-head">
+        <div>
+          <h2>Live drops</h2>
+          <p className="pp-muted">Devnet · program {shortKey(PROGRAM_ID)}</p>
+        </div>
+        <button className="pp-refresh" onClick={() => load()} type="button">
           Refresh
         </button>
       </div>
-      {loading ? <p className="font-mono text-xs text-zinc-500">Scanning drop accounts…</p> : null}
-      {error ? <p className="text-sm text-rose-300">{error}</p> : null}
+
+      {loading ? <p className="pp-empty">Scanning drop accounts…</p> : null}
+      {error ? <p className="pp-err">{error}</p> : null}
       {!loading && !error && drops.length === 0 ? (
-        <div className="rounded-sm border border-dashed border-zinc-700 px-4 py-10 text-sm text-zinc-400">
-          No live drops on this cluster yet. An operator can open a case from the counter, or run{" "}
-          <span className="font-mono text-zinc-200">npm run setup:devnet</span>. Program{" "}
-          <span className="font-mono text-zinc-200">{shortKey(PROGRAM_ID)}</span>.
-        </div>
+        <p className="pp-empty">
+          No live drops on this cluster yet. An operator can open a case from the counter, or run npm run setup:devnet.
+        </p>
       ) : null}
-      <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+
+      <div className="pp-pack-row">
         {drops.map((drop) => (
-          <li key={drop.address}>
-            <Link href={`/drop/${drop.address}`} className="block overflow-hidden rounded-sm border border-zinc-800 bg-zinc-950 hover:border-primary/60">
-              <div className="aspect-[16/9] bg-zinc-900">
-                {drop.image ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={drop.image} alt="" className="h-full w-full object-cover" />
-                ) : (
-                  <div className="flex h-full items-end p-3 font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-600">
-                    Case
-                  </div>
-                )}
-              </div>
-              <div className="space-y-1 p-3">
-                <div className="flex items-baseline justify-between gap-2">
-                  <h2 className="truncate text-lg font-medium">{drop.name}</h2>
-                  <span className="font-mono text-sm text-primary">{formatUsdc(drop.price)}</span>
-                </div>
-                <p className="font-mono text-[11px] text-zinc-500">
-                  {drop.left} left / {drop.total}
-                  {drop.pending ? ` · ${drop.pending} pending` : ""} · {shortKey(drop.operator)}
-                </p>
-              </div>
-            </Link>
-          </li>
+          <Link key={drop.address} href={`/drop/${drop.address}`} className="pp-box">
+            <div className="pp-box-face">
+              {drop.image ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={drop.image} alt="" />
+              ) : null}
+              <span className="pp-box-pill">Open</span>
+            </div>
+            <div className="pp-box-copy">
+              <strong>{drop.name}</strong>
+              <p>
+                {formatUsdc(drop.price)} · {drop.left} left / {drop.total}
+                {drop.pending ? ` · ${drop.pending} pending` : ""} · {shortKey(drop.operator)}
+              </p>
+            </div>
+          </Link>
         ))}
-      </ul>
+      </div>
+
+      <section className="pp-cta">
+        <h2>The inventory is the odds.</h2>
+        <Link href="/operator">Open the operator counter</Link>
+      </section>
     </div>
   );
 }

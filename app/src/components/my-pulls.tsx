@@ -52,33 +52,37 @@ export function MyPulls({ dropFilter }: { dropFilter?: string }) {
     load().catch((e) => setNote(e instanceof Error ? e.message : String(e)));
   }, [load]);
 
-  if (!publicKey) {
-    return <p className="font-mono text-xs text-zinc-500">Connect a wallet to see your pulls.</p>;
-  }
-
   return (
-    <section className="space-y-3">
-      <div className="flex items-baseline justify-between">
-        <h2 className="font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-400">My pulls</h2>
-        <button className="font-mono text-[11px] text-primary" onClick={() => load()} type="button">
+    <section>
+      <div className="pp-band-head">
+        <div>
+          <h2 className={dropFilter ? undefined : "pp-display"}>My pulls</h2>
+          {dropFilter ? null : (
+            <p className="pp-muted" style={{ maxWidth: 560, marginTop: 12 }}>
+              A revealed pull can be claimed if the follow-up transaction did not land. A pending pull can be refunded after 1500 slots.
+            </p>
+          )}
+        </div>
+        <button className="pp-refresh" onClick={() => load()} type="button">
           Refresh
         </button>
       </div>
-      {rows.length === 0 ? <p className="text-sm text-zinc-500">No open pulls on this wallet.</p> : null}
-      <ul className="space-y-2">
+      {!publicKey ? <p className="pp-empty">Connect a wallet to see your pulls.</p> : null}
+      {publicKey && rows.length === 0 ? <p className="pp-empty">No open pulls on this wallet.</p> : null}
+      {rows.length > 0 ? (
+      <div className="pp-panel">
         {rows.map((row) => {
           const refundSlot = row.commitSlot + REVEAL_TIMEOUT_SLOTS;
           const ready = slot > refundSlot;
           return (
-            <li key={row.pubkey} className="rounded-sm border border-zinc-800 bg-zinc-950 px-3 py-2">
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div>
-                  <p className="font-mono text-xs uppercase text-zinc-300">{row.status}</p>
-                  <p className="font-mono text-[11px] text-zinc-500">
-                    drop {shortKey(row.drop)} · nonce {row.nonce}
-                    {row.status === "revealed" ? ` · ${shortKey(row.wonMint)}` : ""}
-                  </p>
-                </div>
+            <div key={row.pubkey} className="pp-row">
+              <div>
+                <p>{row.status}</p>
+                <p className="pp-muted">
+                  drop {shortKey(row.drop)} · nonce {row.nonce}
+                  {row.status === "revealed" ? ` · ${shortKey(row.wonMint)}` : ""}
+                </p>
+              </div>
                 {row.status === "pending" ? (
                   <Button
                     size="sm"
@@ -131,14 +135,14 @@ export function MyPulls({ dropFilter }: { dropFilter?: string }) {
                     Claim
                   </Button>
                 )}
-              </div>
-            </li>
+            </div>
           );
         })}
-      </ul>
-      {note ? <p className="text-sm text-rose-300">{note}</p> : null}
+      </div>
+      ) : null}
+      {note ? <p className="pp-err">{note}</p> : null}
       {sigs.map((sig) => (
-        <a key={sig} className="block font-mono text-[11px] text-primary underline" href={solscanTx(sig)} target="_blank" rel="noreferrer">
+        <a key={sig} className="pp-link" href={solscanTx(sig)} target="_blank" rel="noreferrer">
           {sig.slice(0, 18)}…
         </a>
       ))}

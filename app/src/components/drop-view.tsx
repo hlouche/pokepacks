@@ -38,6 +38,7 @@ export function DropView({ address }: { address: string }) {
   const [won, setWon] = useState<CardView | null>(null);
   const [sigs, setSigs] = useState<{ buy: string; reveal: string; claim: string | null; claimError: string | null } | null>(null);
   const [flipped, setFlipped] = useState(false);
+  const [overlay, setOverlay] = useState(false);
 
   const load = useCallback(async () => {
     const program = getProgram(connection);
@@ -83,38 +84,41 @@ export function DropView({ address }: { address: string }) {
     return sum / BigInt(cards.length);
   }, [cards]);
 
-  if (error && !drop) return <p className="text-rose-300">{error}</p>;
-  if (!drop) return <p className="font-mono text-xs text-zinc-500">Reading the drop account…</p>;
+  if (error && !drop) return <p className="pp-err">{error}</p>;
+  if (!drop) return <p className="pp-empty">Reading the drop account…</p>;
 
   const left = drop.inventory.length;
   const total = left + drop.totalSold;
   const soldOut = left <= drop.pending;
 
   return (
-    <div className="space-y-8">
-      <header className="grid gap-6 md:grid-cols-[180px_1fr]">
-        <div className="overflow-hidden rounded-sm border border-zinc-800 bg-zinc-950">
+    <div className="pp-stack">
+      <article className="pp-detail">
+        <div className="pp-detail-art">
           {drop.image ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={drop.image} alt="" className="aspect-[4/5] w-full object-cover" />
+            <img src={drop.image} alt="" />
           ) : (
-            <div className="flex aspect-[4/5] items-center justify-center font-mono text-xs text-zinc-600">NO ART</div>
+            <p className="pp-muted">No pack art</p>
           )}
         </div>
-        <div className="space-y-3">
-          <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-primary">{drop.status}</p>
-          <h1 className="text-3xl font-semibold tracking-tight">{drop.name}</h1>
-          <p className="font-mono text-xs text-zinc-500">operator {shortKey(drop.operator)}</p>
-          <p className="text-sm text-zinc-300">
-            {formatUsdc(drop.price)} per pack · {left} left of {total}
-            {drop.pending ? ` · ${drop.pending} awaiting reveal` : ""}
-          </p>
-          <p className="font-mono text-sm text-zinc-100">
+        <div className="pp-detail-body">
+          <p className="pp-chip">{drop.status}</p>
+          <h1>{drop.name}</h1>
+          <p className="pp-muted">operator {shortKey(drop.operator)}</p>
+          <div className="pp-price-row">
+            <strong>{formatUsdc(drop.price)}</strong>
+            <span className="pp-muted">
+              {left} left of {total}
+              {drop.pending ? ` · ${drop.pending} awaiting reveal` : ""}
+            </span>
+          </div>
+          <p className="pp-muted">
             EV {formatUsdc(ev)} vs price {formatUsdc(drop.price)}
           </p>
-          <div className="flex flex-wrap gap-2 font-mono text-[11px] text-zinc-400">
+          <div className="pp-odds">
             {odds.map((row) => (
-              <span key={row.tier} className="border border-zinc-800 px-2 py-1">
+              <span key={row.tier}>
                 {tierLabelFrom(row.tier)} {row.count} · {row.pct.toFixed(1)}%
               </span>
             ))}
@@ -129,6 +133,7 @@ export function DropView({ address }: { address: string }) {
               setWon(null);
               setSigs(null);
               setFlipped(false);
+              setOverlay(true);
               try {
                 const result = await buyRevealClaim({
                   connection,
@@ -167,65 +172,58 @@ export function DropView({ address }: { address: string }) {
           >
             {busy ? phase ?? "Working" : soldOut ? "Sold out" : `Buy pack · ${formatUsdc(drop.price)}`}
           </Button>
-          {!publicKey ? <p className="text-xs text-zinc-500">Connect a wallet on devnet to buy.</p> : null}
-          {error ? <p className="text-sm text-rose-300">{error}</p> : null}
+          {!publicKey ? <p className="pp-muted">Connect a wallet on devnet to buy.</p> : null}
+          {error ? <p className="pp-err">{error}</p> : null}
         </div>
-      </header>
+      </article>
 
-      {busy || won ? (
-        <section className="rounded-sm border border-primary/40 bg-zinc-950 p-4">
-          <p className="mb-3 font-mono text-[11px] uppercase tracking-[0.2em] text-primary">
-            {won ? "Pulled" : phase ?? "Shuffling remaining inventory"}
-          </p>
-          <div className="flip-scene w-44">
-            <div className={`flip-card relative ${flipped ? "is-flipped" : ""}`}>
-              <div className="flip-face">
-                <div className="flex aspect-[3/4] items-end rounded-sm border border-zinc-700 bg-zinc-900 p-3">
-                  <p className="font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-500">Pokepacks</p>
-                </div>
-              </div>
-              {won ? (
-                <div className="flip-face flip-back absolute inset-0">
-                  <CardFace card={won} />
-                </div>
-              ) : null}
-            </div>
-          </div>
-          {sigs ? (
-            <ul className="mt-3 space-y-1 font-mono text-[11px]">
-              <li>
-                buy{" "}
-                <a className="text-primary underline" href={solscanTx(sigs.buy)}>
-                  {sigs.buy.slice(0, 18)}…
-                </a>
-              </li>
-              <li>
-                reveal{" "}
-                <a className="text-primary underline" href={solscanTx(sigs.reveal)}>
-                  {sigs.reveal.slice(0, 18)}…
-                </a>
-              </li>
-              <li>
-                claim{" "}
-                {sigs.claim ? (
-                  <a className="text-primary underline" href={solscanTx(sigs.claim)}>
-                    {sigs.claim.slice(0, 18)}…
+      {overlay && (busy || won) ? (
+        <div className="pp-reveal">
+          <div className={`pp-reveal-card ${won && flipped ? "is-pop" : "is-spin"}`}>
+            <p className="pp-chip">{won ? "Pulled" : phase ?? "Shuffling remaining inventory"}</p>
+            <div className="pp-reveal-art">{won ? <CardFace card={won} /> : <div className="pp-card" />}</div>
+            {sigs ? (
+              <ul className="pp-muted" style={{ marginTop: 16, textAlign: "left" }}>
+                <li>
+                  buy{" "}
+                  <a className="pp-link" href={solscanTx(sigs.buy)}>
+                    {sigs.buy.slice(0, 18)}…
                   </a>
-                ) : (
-                  <span className="text-rose-300">{sigs.claimError ?? "claim did not land"}</span>
-                )}
-              </li>
-            </ul>
-          ) : null}
-        </section>
+                </li>
+                <li>
+                  reveal{" "}
+                  <a className="pp-link" href={solscanTx(sigs.reveal)}>
+                    {sigs.reveal.slice(0, 18)}…
+                  </a>
+                </li>
+                <li>
+                  claim{" "}
+                  {sigs.claim ? (
+                    <a className="pp-link" href={solscanTx(sigs.claim)}>
+                      {sigs.claim.slice(0, 18)}…
+                    </a>
+                  ) : (
+                    <span className="pp-err">{sigs.claimError ?? "claim did not land"}</span>
+                  )}
+                </li>
+              </ul>
+            ) : null}
+            {!busy ? (
+              <button className="pp-refresh" style={{ marginTop: 16 }} type="button" onClick={() => setOverlay(false)}>
+                Close
+              </button>
+            ) : null}
+          </div>
+        </div>
       ) : null}
 
       <section>
-        <h2 className="mb-3 font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-400">
-          Remaining inventory · {cards.length}
-        </h2>
-        {cards.length === 0 ? <p className="text-sm text-zinc-500">Nothing left in the case.</p> : null}
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+        <div className="pp-band-head">
+          <h2>Remaining inventory</h2>
+          <span className="pp-muted">{cards.length}</span>
+        </div>
+        {cards.length === 0 ? <p className="pp-empty">Nothing left in the case.</p> : null}
+        <div className="pp-inventory">
           {cards.map((card) => (
             <CardFace key={card.mint} card={card} />
           ))}

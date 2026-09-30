@@ -102,16 +102,16 @@ export function OperatorConsole() {
   }
 
   if (!publicKey || !signTransaction) {
-    return <p className="text-sm text-zinc-400">Connect the operator wallet to open the counter.</p>;
+    return <p className="pp-empty">Connect the operator wallet to open the counter.</p>;
   }
 
   const selectedMint = mints.find((m) => m.mint === mint);
   const sign = signTransaction as never;
 
   return (
-    <div className="grid gap-8 lg:grid-cols-2">
-      <section className="space-y-3 rounded-sm border border-zinc-800 p-4">
-        <h2 className="font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-400">Create drop</h2>
+    <div className="pp-ops">
+      <section className="pp-panel">
+        <h2>Create drop</h2>
         <Label htmlFor="usdc">Price mint (6 decimals)</Label>
         <Input
           id="usdc"
@@ -153,19 +153,19 @@ export function OperatorConsole() {
         </Button>
       </section>
 
-      <section className="space-y-3 rounded-sm border border-zinc-800 p-4">
-        <h2 className="font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-400">Your drops</h2>
-        {drops.length === 0 ? <p className="text-sm text-zinc-500">No drops from this wallet yet.</p> : null}
+      <section className="pp-panel">
+        <h2>Your drops</h2>
+        {drops.length === 0 ? <p className="pp-muted">No drops from this wallet yet.</p> : null}
         <ul className="space-y-2">
           {drops.map((drop) => (
             <li key={drop.pubkey}>
               <button
                 type="button"
-                className={`w-full rounded-sm border px-3 py-2 text-left ${selectedDrop === drop.pubkey ? "border-primary" : "border-zinc-800"}`}
+                className={`pp-pick${selectedDrop === drop.pubkey ? " on" : ""}`}
                 onClick={() => setSelectedDrop(drop.pubkey)}
               >
-                <span className="block text-sm">{drop.name || "Untitled"}</span>
-                <span className="font-mono text-[11px] text-zinc-500">
+                <span style={{ display: "block" }}>{drop.name || "Untitled"}</span>
+                <span className="pp-muted">
                   {drop.status} · {formatUsdc(drop.price)} · {drop.left} left · pending {drop.pending} · {shortKey(drop.pubkey)}
                 </span>
               </button>
@@ -184,9 +184,9 @@ export function OperatorConsole() {
         ) : null}
       </section>
 
-      <section className="space-y-3 rounded-sm border border-zinc-800 p-4 lg:col-span-2">
-        <h2 className="font-mono text-[11px] uppercase tracking-[0.2em] text-zinc-400">Deposit a card</h2>
-        <p className="text-sm text-zinc-500">
+      <section className="pp-panel pp-wide">
+        <h2>Deposit a card</h2>
+        <p className="pp-muted">
           Pick a 0-decimal mint already in this wallet. Draft drops can take cards back. Closed drops use withdraw unsold, one card per transaction.
         </p>
         <Label htmlFor="drop">Drop</Label>
@@ -194,7 +194,7 @@ export function OperatorConsole() {
         <Label htmlFor="mint">Mint</Label>
         <select
           id="mint"
-          className="h-8 w-full rounded-sm border border-zinc-700 bg-zinc-950 px-2 font-mono text-xs"
+          className="w-full px-2"
           value={mint}
           onChange={(e) => setMint(e.target.value)}
         >
@@ -294,9 +294,9 @@ export function OperatorConsole() {
         </div>
       </section>
       {note ? (
-        <p className="break-all font-mono text-xs text-zinc-300 lg:col-span-2">
+        <p className="pp-muted pp-wide" style={{ overflowWrap: "anywhere" }}>
           {note.length > 40 && !note.includes(" ") ? (
-            <a className="text-primary underline" href={solscanTx(note)}>
+            <a className="pp-link" href={solscanTx(note)}>
               {note}
             </a>
           ) : (
